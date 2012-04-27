@@ -65,5 +65,26 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
             h.AssertFileInWorkspace("MyProject", "README", "tldr");
         }
+
+        [TestMethod]
+        public void CloneProjectWithInconsistentCasing()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "First commit", DateTime.Parse("2012-01-02 12:12:12"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Folder")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Folder/File.txt", "File contents")
+                r.Changeset(3, "Second commit", DateTime.Parse("2012-01-03 12:12:12"))
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/myproject/folder/file2.txt", "other file")
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject");
+            h.AssertGitRepo("MyProject");
+//          h.AssertCleanStatus("MyProject");
+            // Note the re-cased 'Folder'
+//          h.AssertTreeEntry("MyProject", "HEAD", "Folder/file2.txt");
+            h.AssertFileInWorkspace("MyProject", "Folder/file2.txt");
+        }
     }
 }
