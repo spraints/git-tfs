@@ -66,6 +66,12 @@ namespace Sep.Git.Tfs.Test.Integration
                 _script = script;
             }
 
+            public void CreateProject(int changesetId, DateTime checkinDate, string projectRoot)
+            {
+                Changeset(changesetId, "Project created from template", checkinDate)
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, projectRoot);
+            }
+
             public FakeChangesetBuilder Changeset(int changesetId, string message, DateTime checkinDate)
             {
                 var changeset =new ScriptedChangeset
