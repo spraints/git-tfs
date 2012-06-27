@@ -431,10 +431,10 @@ namespace Sep.Git.Tfs.Core
             Apply(shelvesetChangeset, destinationRef);
         }
 
-        public void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
+        public void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies, string checkinComment)
         {
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => Shelve(shelvesetName, head, parentChangeset, evaluateCheckinPolicies, workspace));
+                              workspace => Shelve(shelvesetName, head, parentChangeset, evaluateCheckinPolicies, checkinComment, workspace));
         }
 
         public bool HasShelveset(string shelvesetName)
@@ -442,24 +442,24 @@ namespace Sep.Git.Tfs.Core
             return Tfs.HasShelveset(shelvesetName);
         }
 
-        private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies, ITfsWorkspace workspace)
+        private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies, string checkinComment, ITfsWorkspace workspace)
         {
             PendChangesToWorkspace(head, parentChangeset.GitCommit, workspace);
-            workspace.Shelve(shelvesetName, evaluateCheckinPolicies, () => Repository.GetCommitMessage(head, parentChangeset.GitCommit));
+            workspace.Shelve(shelvesetName, evaluateCheckinPolicies, checkinComment);
         }
 
-        public long CheckinTool(string head, TfsChangesetInfo parentChangeset)
+        public long CheckinTool(string head, TfsChangesetInfo parentChangeset, string checkinComment)
         {
             var changeset = 0L;
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => changeset = CheckinTool(head, parentChangeset, workspace));
+                              workspace => changeset = CheckinTool(head, parentChangeset, checkinComment, workspace));
             return changeset;
         }
 
-        private long CheckinTool(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        private long CheckinTool(string head, TfsChangesetInfo parentChangeset, string checkinComment, ITfsWorkspace workspace)
         {
             PendChangesToWorkspace(head, parentChangeset.GitCommit, workspace);
-            return workspace.CheckinTool(() => Repository.GetCommitMessage(head, parentChangeset.GitCommit));
+            return workspace.CheckinTool(checkinComment);
         }
 
         private void PendChangesToWorkspace(string head, string parent, ITfsWorkspace workspace)
@@ -470,26 +470,26 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public long Checkin(string head, TfsChangesetInfo parentChangeset)
+        public long Checkin(string head, TfsChangesetInfo parentChangeset, string checkinComment)
         {
             var changeset = 0L;
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => changeset = Checkin(head, parentChangeset.GitCommit, workspace));
+                              workspace => changeset = Checkin(head, parentChangeset.GitCommit, checkinComment, workspace));
             return changeset;
         }
 
-        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset)
+        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, string checkinComment)
         {
             var changeset = 0L;
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => changeset = Checkin(head, parent, workspace));
+                              workspace => changeset = Checkin(head, parent, checkinComment, workspace));
             return changeset;
         }
 
-        private long Checkin(string head, string parent, ITfsWorkspace workspace)
+        private long Checkin(string head, string parent, string checkinComment, ITfsWorkspace workspace)
         {
             PendChangesToWorkspace(head, parent, workspace);
-            return workspace.Checkin();
+            return workspace.Checkin(checkinComment);
         }
     }
 }

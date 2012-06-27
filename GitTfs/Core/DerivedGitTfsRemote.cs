@@ -176,7 +176,7 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
-        public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
+        public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies, string checkinComment)
         {
             throw new NotImplementedException();
         }
@@ -186,17 +186,17 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
-        public long CheckinTool(string head, TfsChangesetInfo parentChangeset)
+        public long CheckinTool(string head, TfsChangesetInfo parentChangeset, string checkinComment)
         {
             throw new NotImplementedException();
         }
 
-        public long Checkin(string treeish, TfsChangesetInfo parentChangeset)
+        public long Checkin(string treeish, TfsChangesetInfo parentChangeset, string checkinComment)
         {
             throw new NotImplementedException();
         }
 
-        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset)
+        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, string checkinComment)
         {
             throw new NotImplementedException();
         }

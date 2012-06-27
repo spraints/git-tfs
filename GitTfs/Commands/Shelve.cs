@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
+using Sep.Git.Tfs.Util;
 using StructureMap;
 
 namespace Sep.Git.Tfs.Commands
@@ -17,14 +18,16 @@ namespace Sep.Git.Tfs.Commands
         private readonly TextWriter _stdout;
         private readonly CheckinOptions _checkinOptions;
         private readonly TfsWriter _writer;
+        private readonly Commenter _commenter;
 
         private bool EvaluateCheckinPolicies { get; set; }
 
-        public Shelve(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer)
+        public Shelve(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer, Commenter commenter)
         {
             _stdout = stdout;
             _checkinOptions = checkinOptions;
             _writer = writer;
+            _commenter = commenter;
         }
 
         public OptionSet OptionSet
@@ -55,7 +58,7 @@ namespace Sep.Git.Tfs.Commands
                     _stdout.WriteLine("Shelveset \"" + shelvesetName + "\" already exists. Use -f to replace it.");
                     return GitTfsExitCodes.ForceRequired;
                 }
-                changeset.Remote.Shelve(shelvesetName, refToShelve, changeset, EvaluateCheckinPolicies);
+                changeset.Remote.Shelve(shelvesetName, refToShelve, changeset, EvaluateCheckinPolicies, _commenter.Comment(changeset.Remote.Repository, refToShelve, changeset.GitCommit));
                 return GitTfsExitCodes.OK;
             });
         }

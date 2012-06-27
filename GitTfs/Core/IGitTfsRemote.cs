@@ -27,15 +27,15 @@ namespace Sep.Git.Tfs.Core
         void QuickFetch();
         void QuickFetch(int changesetId);
         void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch);
-        void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies);
+        void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies, string checkinComment);
         bool HasShelveset(string shelvesetName);
-        long CheckinTool(string head, TfsChangesetInfo parentChangeset);
-        long Checkin(string treeish, TfsChangesetInfo parentChangeset);
+        long CheckinTool(string head, TfsChangesetInfo parentChangeset, string checkinComment);
+        long Checkin(string treeish, TfsChangesetInfo parentChangeset, string checkinComment);
         
         /// <summary>
         /// Checks in to TFS set of changes from git repository between given commits (parent..head) onto given TFS changeset. Returns ID of the new changeset.
         /// </summary>
-        long Checkin(string head, string parent, TfsChangesetInfo parentChangeset);
+        long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, string checkinComment);
         void CleanupWorkspace();
         ITfsChangeset GetChangeset(long changesetId);
         void UpdateRef(string commitHash, long changesetId);
