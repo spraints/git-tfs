@@ -10,6 +10,36 @@ using Sep.Git.Tfs.Util;
 using StructureMap;
 using StructureMap.Graph;
 
+
+
+/*
+ * TODO: 
+ * 1. Fix up build configuration.
+ *    * GitTfsTest is always enabled.
+ *    * VS2008 is x86 (so git-tfs should be, too, and git-tfs-test)
+ *    * Other plugins should be any cpu
+ *    * integrate the vsXXtest project, via VsFake?
+ *    * other plugins are disabled by default?
+ * 2. Init:
+ *    * [fc] input = command-line flags, output = config vars to set
+ *    * [fc] input = config vars to set, output = errors / warnings (e.g. tfs id is already configured)
+ * 3. Fetch
+ *    * [fc] input = command-line flags; output = current config (or multiple configs) to fetch
+ *    * [fc] input = command-line flags, current config, git history; output = starting point (null or a changeset / commit, and a branch to update)
+ *    * [fc] input = changeset info, current tree; output = tree mods, in order
+ * 4. quick-fetch
+ *    * ?
+ * 5. checkin / shelve / checkintool
+ *    * ?
+ * 6. rcheckin
+ *    * ?
+ * 7. pull (fetch plus...)
+ *    * [fc] input = status of head, starting point (from fetch); output = go / nogo
+ */
+
+
+
+ 
 namespace Sep.Git.Tfs
 {
     public class Program

@@ -19,8 +19,9 @@ namespace Sep.Git.Tfs.Commands
         private readonly TextWriter output;
         private readonly IGitHelpers gitHelper;
         private readonly IHelpHelper _help;
+        private readonly RemoteBuilder _builder;
 
-        public Init(RemoteOptions remoteOptions, InitOptions initOptions, Globals globals, TextWriter output, IGitHelpers gitHelper, IHelpHelper help)
+        public Init(RemoteOptions remoteOptions, InitOptions initOptions, Globals globals, TextWriter output, IGitHelpers gitHelper, IHelpHelper help, RemoteBuilder builder)
         {
             this.remoteOptions = remoteOptions;
             this.gitHelper = gitHelper;
@@ -28,6 +29,7 @@ namespace Sep.Git.Tfs.Commands
             this.output = output;
             this.globals = globals;
             this.initOptions = initOptions;
+            _builder = builder;
         }
 
         public OptionSet OptionSet
@@ -81,9 +83,10 @@ namespace Sep.Git.Tfs.Commands
 
         private void GitTfsInit(string tfsUrl, string tfsRepositoryPath)
         {
-            gitHelper.SetConfig("core.autocrlf", "false");
-            gitHelper.SetConfig("core.ignorecase", "false");
-            globals.Repository.CreateTfsRemote(globals.RemoteId, tfsUrl, tfsRepositoryPath, remoteOptions);
+            globals.Repository.CreateTfsRemote(_builder.Build(globals.RemoteId, tfsUrl, tfsRepositoryPath, remoteOptions));
+            //gitHelper.SetConfig("core.autocrlf", "false");
+            //gitHelper.SetConfig("core.ignorecase", "false");
+            //globals.Repository.CreateTfsRemote(globals.RemoteId, tfsUrl, tfsRepositoryPath, remoteOptions);
         }
     }
 

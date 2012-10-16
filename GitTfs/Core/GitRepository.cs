@@ -98,6 +98,7 @@ namespace Sep.Git.Tfs.Core
 
         private IDictionary<string, IGitTfsRemote> ReadTfsRemotes()
         {
+            // does this need to ensuretfsauthenticated?
             _repository.Config.Set("tfs.touch", "1"); // reload configuration, because `git tfs init` and `git tfs clone` use Process.Start to update the config, so _repository's copy is out of date.
             return _remoteConfigReader.Load(_repository.Config).Select(x => _container.With(x).With<IGitRepository>(this).GetInstance<IGitTfsRemote>()).ToDictionary(x => x.Id);
         }
@@ -137,7 +138,19 @@ namespace Sep.Git.Tfs.Core
                 _repository.Config.Set(config.Key, config.Value);
             }
 
+            //if (remoteOptions != null)
+            //{
+            //    if (remoteOptions.NoMetaData) SetTfsConfig(remoteId, "no-meta-data", 1);
+            //    if (remoteOptions.IgnoreRegex != null) SetTfsConfig(remoteId, "ignore-paths", remoteOptions.IgnoreRegex);
+            //    if (!string.IsNullOrEmpty(remoteOptions.Username)) SetTfsConfig(remoteId, "username", remoteOptions.Username);
+            //    if (!string.IsNullOrEmpty(remoteOptions.Password)) SetTfsConfig(remoteId, "password", remoteOptions.Password);
+            //}
 
+            //SetTfsConfig(remoteId, "url", tfsUrl);
+            //SetTfsConfig(remoteId, "repository", tfsRepositoryPath);
+            //SetTfsConfig(remoteId, "fetch", "refs/remotes/" + remoteId + "/master");
+
+            //Directory.CreateDirectory(Path.Combine(GitDir, "tfs"));
             _cachedRemotes = null;
         }
 
