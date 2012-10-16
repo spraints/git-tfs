@@ -136,6 +136,7 @@
     <Compile Include="Core\GitChangeInfo.cs" />
     <Compile Include="Core\GitCommit.cs" />
     <Compile Include="Core\GitObject.cs" />
+    <Compile Include="Core\RemoteConfigInitializer.cs" />
     <Compile Include="Core\RemoteConfigReader.cs" />
     <Compile Include="Core\RemoteInfo.cs" />
     <Compile Include="Core\GitTreeEntry.cs" />
