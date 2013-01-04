@@ -122,6 +122,16 @@ namespace Sep.Git.Tfs.Test.Integration
 
         #endregion
 
+        #region read from 'tfs'
+
+        public ScriptedChangeset GetLatestChangeset()
+        {
+            var script = Script.Load(FakeScript);
+            return script.Changesets.Last();
+        }
+
+        #endregion
+
         #region run git-tfs
 
         public string TfsUrl { get { return "http://does/not/matter"; } }
@@ -175,6 +185,23 @@ namespace Sep.Git.Tfs.Test.Integration
                 var path = new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath;
                 return Path.GetDirectoryName(path);
             }
+        }
+
+        #endregion
+
+        #region Make changes with git
+
+        public void AddFileToIndex(string repoPath, string path, string content)
+        {
+            var repository = Repository(repoPath);
+            path = Path.Combine(repository.Info.WorkingDirectory, path);
+            File.WriteAllText(path, content);
+            repository.Index.Stage(path);
+        }
+
+        public void Commit(string repoPath, string message)
+        {
+            Repository(repoPath).Commit(message);
         }
 
         #endregion

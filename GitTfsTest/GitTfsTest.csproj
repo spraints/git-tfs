@@ -121,6 +121,7 @@
     <Compile Include="Core\StubbedCheckinEvaluationResult.cs" />
     <Compile Include="Core\TfsWorkspaceTests.cs" />
     <Compile Include="GitTfsRegexTests.cs" />
+    <Compile Include="Integration\CheckinTests.cs" />
     <Compile Include="Integration\CloneTests.cs" />
     <Compile Include="Integration\IntegrationHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

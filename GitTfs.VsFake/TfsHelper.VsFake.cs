@@ -47,6 +47,11 @@ namespace Sep.Git.Tfs.VsFake
             return new NullIdentity();
         }
 
+        public bool MatchesUrl(string tfsUrl)
+        {
+            return Url == tfsUrl;
+        }
+
         #endregion
 
         #region read changesets
@@ -189,7 +194,7 @@ namespace Sep.Git.Tfs.VsFake
         public void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
             Trace.WriteLine("Setting up a TFS workspace at " + directory);
-            var fakeWorkspace = new FakeWorkspace(directory, remote.TfsRepositoryPath);
+            var fakeWorkspace = new FakeWorkspace(directory, remote.TfsRepositoryPath, _script);
             var workspace = _container.With("localDirectory").EqualTo(directory)
                 .With("remote").EqualTo(remote)
                 .With("contextVersion").EqualTo(versionToFetch)
@@ -203,12 +208,18 @@ namespace Sep.Git.Tfs.VsFake
         {
             string _directory;
             string _repositoryRoot;
+            Script _script;
+            List<PendingChange> _pendingChanges = new List<PendingChange>();
 
-            public FakeWorkspace(string directory, string repositoryRoot)
+            public FakeWorkspace(string directory, string repositoryRoot, Script script)
             {
                 _directory = directory;
                 _repositoryRoot = repositoryRoot;
+                _script = script;
             }
+
+            public string LocalDirectory { get { return _directory; } }
+            public string RepositoryRoot { get { return _repositoryRoot; } }
 
             public void GetSpecificVersion(IChangeset changeset)
             {
@@ -227,29 +238,117 @@ namespace Sep.Git.Tfs.VsFake
                 }
             }
 
-            #region unimplemented
+            public int PendAdd(string path)
+            {
+                _pendingChanges.Add(new PendingChange(this, TfsChangeType.Add, path));
+                return 1;
+            }
 
             public IPendingChange[] GetPendingChanges()
             {
-                throw new NotImplementedException();
+                return _pendingChanges.Cast<IPendingChange>().ToArray();
             }
+
+            #region PendingChange class
+
+            class PendingChange : IPendingChange
+            {
+                FakeWorkspace _workspace;
+                TfsChangeType _changeType;
+                string _path;
+
+                public PendingChange(FakeWorkspace workspace, TfsChangeType changeType, string path)
+                {
+                    _workspace = workspace;
+                    _changeType = changeType;
+                    _path = path;
+                }
+
+                private string LocalPath
+                {
+                    get
+                    {
+                        return _path;
+                    }
+                }
+
+                private string RepositoryPath
+                {
+                    get
+                    {
+                        if(!_path.StartsWith(_workspace.LocalDirectory))
+                            throw new Exception("Need to make " + _path + " relative to " + _workspace.LocalDirectory + "!");
+                        var relativePath = _path.Replace(_workspace.LocalDirectory, "");
+                        if (relativePath.StartsWith("/") || relativePath.StartsWith("\\"))
+                            relativePath = relativePath.Substring(1);
+                        var sep = _workspace.RepositoryRoot.EndsWith("/") ? "" : "/";
+                        return _workspace.RepositoryRoot + sep + relativePath;
+                    }
+                }
+
+                public ScriptedChange ToScript()
+                {
+                    return new ScriptedChange
+                    {
+                        ChangeType = _changeType,
+                        Content = File.ReadAllText(LocalPath),
+                        ItemType = TfsItemType.File,
+                        RepositoryPath = RepositoryPath,
+                    };
+                }
+            }
+
+            #endregion
+
+            #region policy "evaluation"
 
             public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
             {
-                throw new NotImplementedException();
+                return new StubCheckinEvaluationResult();
             }
 
-            public void Shelve(IShelveset shelveset, IPendingChange[] changes, TfsShelvingOptions options)
+            class StubCheckinEvaluationResult : ICheckinEvaluationResult
             {
-                throw new NotImplementedException();
+                public ICheckinConflict[] Conflicts
+                {
+                    get { return new ICheckinConflict[0]; }
+                }
+
+                public ICheckinNoteFailure[] NoteFailures
+                {
+                    get { return new ICheckinNoteFailure[0]; }
+                }
+
+                public IPolicyFailure[] PolicyFailures
+                {
+                    get { return new IPolicyFailure[0]; }
+                }
+
+                public Exception PolicyEvaluationException
+                {
+                    get { return null; }
+                }
             }
+
+            #endregion
 
             public int Checkin(IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo, bool overrideGatedCheckIn)
             {
-                throw new NotImplementedException();
+                var changeset = new ScriptedChangeset
+                {
+                    CheckinDate = DateTime.Now,
+                    Comment = comment,
+                    Id = _script.Changesets.Last().Id + 1,
+                };
+                changeset.Changes.AddRange(changes.Cast<PendingChange>().Select(change => change.ToScript()));
+                _script.Changesets.Add(changeset);
+                _script.Save(TfsPlugin.ScriptPath);
+                return changeset.Id;
             }
 
-            public int PendAdd(string path)
+            #region unimplemented
+
+            public void Shelve(IShelveset shelveset, IPendingChange[] changes, TfsShelvingOptions options)
             {
                 throw new NotImplementedException();
             }
@@ -303,6 +402,10 @@ namespace Sep.Git.Tfs.VsFake
 
         public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
         {
+            return workItems.Select(workItem => GetWorkItemCheckinInfo(workItem, checkinAction));
+        }
+        private IWorkItemCheckinInfo GetWorkItemCheckinInfo(string workItem, TfsWorkItemCheckinAction checkinAction)
+        {
             throw new NotImplementedException();
         }
 
@@ -313,6 +416,8 @@ namespace Sep.Git.Tfs.VsFake
 
         public ICheckinNote CreateCheckinNote(Dictionary<string, string> checkinNotes)
         {
+            if (checkinNotes.IsEmpty())
+                return null;
             throw new NotImplementedException();
         }
 
@@ -322,11 +427,6 @@ namespace Sep.Git.Tfs.VsFake
         }
 
         public IChangeset GetChangeset(int changesetId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool MatchesUrl(string tfsUrl)
         {
             throw new NotImplementedException();
         }
@@ -367,6 +467,7 @@ namespace Sep.Git.Tfs.VsFake
         {
             throw new NotImplementedException();
         }
+
         #endregion
     }
 }
