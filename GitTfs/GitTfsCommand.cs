@@ -1,3 +1,4 @@
+// 1252, LF
 using System.Collections.Generic;
 using NDesk.Options;
 using StructureMap;

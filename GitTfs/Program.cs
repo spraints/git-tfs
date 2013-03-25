@@ -1,3 +1,4 @@
+// 1252, CR LF
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

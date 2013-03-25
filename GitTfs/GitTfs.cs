@@ -1,4 +1,5 @@
-﻿using System;
+﻿// UTF-8, LF
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;

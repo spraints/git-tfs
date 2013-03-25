@@ -1,3 +1,4 @@
+﻿// UTF-8, CR LF
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
