@@ -14,25 +14,24 @@ namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("clone")]
     [Description("clone [options] tfs-url-or-instance-name repository-path <git-repository-path>\n  ex : git tfs clone http://myTfsServer:8080/tfs/TfsRepository $/ProjectName/ProjectBranch\n")]
+    [AfterRun(typeof(CleanupWorkspaces))]
     public class Clone : GitTfsCommand
     {
         private readonly Fetch fetch;
         private readonly Init init;
         private readonly Globals globals;
         private readonly InitBranch initBranch;
-        private readonly CleanupWorkspaceLocal cleanupWorkspaceDirectory;
         private readonly TextWriter stdout;
 
         private bool withBranches;
 
-        public Clone(Globals globals, Fetch fetch, Init init, InitBranch initBranch, TextWriter stdout, CleanupWorkspaceLocal cleanupWorkspaceDirectory)
+        public Clone(Globals globals, Fetch fetch, Init init, InitBranch initBranch, TextWriter stdout)
         {
             this.fetch = fetch;
             this.init = init;
             this.globals = globals;
             this.initBranch = initBranch;
             this.stdout = stdout;
-            this.cleanupWorkspaceDirectory = cleanupWorkspaceDirectory;
         }
 
         public OptionSet OptionSet
@@ -70,7 +69,6 @@ namespace Sep.Git.Tfs.Commands
                     initBranch.CloneAllBranches = true;
                     retVal = initBranch.Run();
                 }
-                cleanupWorkspaceDirectory.Run();
                 return retVal;
             }
             catch

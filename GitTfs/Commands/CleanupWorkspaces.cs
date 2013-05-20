@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using StructureMap;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
-using StructureMap;
+using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("cleanup-workspaces")]
     [Description("cleanup-workspaces [tfs-remote-id]...")]
     [RequiresValidGitRepository]
-    public class CleanupWorkspaces : GitTfsCommand
+    public class CleanupWorkspaces : GitTfsCommand, Filter
     {
         private readonly TextWriter _stdout;
         private readonly Globals _globals;
@@ -27,6 +28,11 @@ namespace Sep.Git.Tfs.Commands
         public OptionSet OptionSet
         {
             get { return _cleanupOptions.OptionSet; }
+        }
+
+        public void Call()
+        {
+            Run();
         }
 
         public int Run()
