@@ -177,5 +177,42 @@ namespace Sep.Git.Tfs.Test.Util
             Assert.Equal(TestCommandBase.Form.List, command.Calls[0].Form);
             Assert.Same(args, command.Calls[0].Args);
         }
+
+        public class MyAfterFilter : Filter
+        {
+            public void Call()
+            {
+                CallCount += 1;
+            }
+
+            public static int CallCount { get; set; }
+        }
+
+        [AfterRun(typeof(MyAfterFilter))]
+        public class Filtered : TestCommandBase
+        {
+        }
+
+        [Fact]
+        public void CallsAfterFilter()
+        {
+            MyAfterFilter.CallCount = 0;
+            var command = new Filtered();
+            _mocks.ClassUnderTest.Run(command, Args());
+            Assert.Equal(1, MyAfterFilter.CallCount);
+        }
+
+        public class ChildOfFiltered : Filtered
+        {
+        }
+
+        [Fact]
+        public void CallsAfterFilterOnChildren()
+        {
+            MyAfterFilter.CallCount = 0;
+            var command = new ChildOfFiltered();
+            _mocks.ClassUnderTest.Run(command, Args());
+            Assert.Equal(1, MyAfterFilter.CallCount);
+        }
     }
 }

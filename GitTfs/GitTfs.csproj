@@ -213,10 +213,12 @@
     <Compile Include="Core\TfsWorkspace.cs" />
     <Compile Include="Core\TfsWriter.cs" />
     <Compile Include="Core\GitTfsException.cs" />
+    <Compile Include="Util\AfterRunAttribute.cs" />
     <Compile Include="Util\AuthorsFile.cs" />
     <Compile Include="Util\CommitSpecificCheckinOptionsFactory.cs" />
     <Compile Include="Core\GitTfsVersionProvider.cs" />
     <Compile Include="Util\ExceptionFormattingExtensions.cs" />
+    <Compile Include="Util\Filter.cs" />
     <Compile Include="Util\GitTfsCommandFactory.cs" />
     <Compile Include="Util\GitTfsCommandRunner.cs" />
     <Compile Include="Core\IGitTfsVersionProvider.cs" />
