@@ -109,11 +109,7 @@ namespace Sep.Git.Tfs.Commands
 
         private IEnumerable<InstanceRef> GetCommandInstances()
         {
-            return _container.Model
-                .PluginTypes
-                .Single(p => p.PluginType == typeof (GitTfsCommand))
-                .Instances
-                .Where(i => i != null);
+            return _container.GetPlugins<GitTfsCommand>();
         }
 
         private string GetCommandUsage(GitTfsCommand command)
