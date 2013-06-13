@@ -61,6 +61,7 @@ namespace Sep.Git.Tfs.Commands
 
         private void List(string label, IEnumerable<PerformanceCounter> counters)
         {
+            RandomActivity();
             List(label, counters, counter => counter.CounterName + " - " + counter.NextValue());
         }
 
@@ -75,6 +76,15 @@ namespace Sep.Git.Tfs.Commands
             foreach (var s in things.Select(x => format(x)).OrderBy(s => s))
             {
                 _stdout.WriteLine("- " + s);
+            }
+        }
+
+        private void RandomActivity()
+        {
+            var rand = new Random();
+            for (var i = 0; rand.Next(100) < 95; i++)
+            {
+                _stdout.WriteLine(i.ToString());
             }
         }
     }
