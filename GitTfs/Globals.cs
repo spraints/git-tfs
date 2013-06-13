@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
+using GitTfs.Profiling;
 using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs
@@ -24,9 +25,23 @@ namespace Sep.Git.Tfs
                         v => DebugOutput = v != null },
                     { "i|tfs-remote|remote|id=", "The remote ID of the TFS to interact with\ndefault: default",
                         v => UserSpecifiedRemoteId = v },
+                    { "profiler=", "A profiler to run",
+                        v => _profilerLoader.Init(v) },
                 };
             }
         }
+
+        public Globals(ProfilerLoader profilerLoader)
+        {
+            _profilerLoader = profilerLoader;
+        }
+
+        public Globals() : this(new ProfilerLoader())
+        {
+        }
+
+        private ProfilerLoader _profilerLoader;
+        public Profiler Profiler { get { return _profilerLoader.Instance; } }
 
         public bool ShowHelp { get; set; }
         public bool ShowVersion { get; set; }
