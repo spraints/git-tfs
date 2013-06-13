@@ -378,6 +378,7 @@ namespace Sep.Git.Tfs.Core
                 result.Tree = Repository.CommandOneline("write-tree");
             }));
             if (!String.IsNullOrEmpty(parent)) result.CommitParents.Add(parent);
+            globals.Profiler.Sample("apply-changeset:" + changeset.Summary.ChangesetId);
             return result;
         }
 
