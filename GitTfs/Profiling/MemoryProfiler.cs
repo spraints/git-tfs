@@ -3,8 +3,8 @@ using StructureMap;
 
 namespace GitTfs.Profiling
 {
-    [PluginFamily]
-    public abstract class Profiler
+    [Pluggable("memory")]
+    public class MemoryProfiler : Profiler
     {
     }
 }

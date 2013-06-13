@@ -214,6 +214,7 @@
     <Compile Include="Core\TfsWorkspace.cs" />
     <Compile Include="Core\TfsWriter.cs" />
     <Compile Include="Core\GitTfsException.cs" />
+    <Compile Include="Profiling\MemoryProfiler.cs" />
     <Compile Include="Profiling\NullProfiler.cs" />
     <Compile Include="Profiling\Profiler.cs" />
     <Compile Include="Profiling\ProfilerLoader.cs" />

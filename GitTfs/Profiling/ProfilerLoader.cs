@@ -28,7 +28,7 @@ namespace GitTfs.Profiling
         {
             try
             {
-                throw new Exception("todo: init profiler");
+                Instance = _container.GetInstance<Profiler>(profilerSpec);
             }
             catch (Exception e)
             {
