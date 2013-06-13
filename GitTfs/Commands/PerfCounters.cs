@@ -7,12 +7,12 @@ using StructureMap;
 
 namespace Sep.Git.Tfs.Commands
 {
-    [Pluggable("a")]
-    public class A : GitTfsCommand
+    [Pluggable("perf-counters")]
+    public class PerfCounters : GitTfsCommand
     {
         TextWriter _stdout;
 
-        public A(TextWriter stdout)
+        public PerfCounters(TextWriter stdout)
         {
             _stdout = stdout;
         }
