@@ -35,8 +35,7 @@ namespace Sep.Git.Tfs.Commands
             switch (category.CategoryType)
             {
                 case PerformanceCounterCategoryType.SingleInstance:
-                    List(categoryName + " Counters", category.GetCounters(),
-                        counter => counter.CounterName);
+                    List(categoryName + " Counters", category.GetCounters());
                     break;
                 case PerformanceCounterCategoryType.MultiInstance:
                     List(categoryName + " Instances", category.GetInstanceNames());
@@ -51,14 +50,18 @@ namespace Sep.Git.Tfs.Commands
         public int Run(string categoryName, string instanceName)
         {
             var category = GetCategory(categoryName);
-            List(categoryName + " / " + instanceName, category.GetCounters(instanceName),
-                counter => counter.CounterName);
+            List(categoryName + " / " + instanceName, category.GetCounters(instanceName));
             return GitTfsExitCodes.OK;
         }
 
         private PerformanceCounterCategory GetCategory(string categoryName)
         {
             return PerformanceCounterCategory.GetCategories().Single(c => c.CategoryName == categoryName);
+        }
+
+        private void List(string label, IEnumerable<PerformanceCounter> counters)
+        {
+            List(label, counters, counter => counter.CounterName + " - " + counter.NextValue());
         }
 
         private void List<Thing>(string label, IEnumerable<Thing> things)
