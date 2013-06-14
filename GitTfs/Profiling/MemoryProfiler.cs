@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,9 +10,9 @@ namespace GitTfs.Profiling
     [Pluggable("memory")]
     public class MemoryProfiler : Profiler
     {
-        protected override IEnumerable<object> GetValues()
+        protected override IEnumerable GetValues()
         {
-            return Counters.Select(counter => (object) counter.NextValue());
+            return Counters.Select(counter => counter.NextValue());
         }
 
         protected override IEnumerable<string> GetColumnNames()
