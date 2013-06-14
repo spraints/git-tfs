@@ -113,21 +113,13 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
-            var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest,
-                                    deletionId:          0,
-                                    recursion:           RecursionType.Full,
-                                    user:                null,
-                                    versionFrom:         new ChangesetVersionSpec((int)startVersion),
-                                    versionTo:           VersionSpec.Latest,
-                                    maxCount:            int.MaxValue,
-                                    includeChanges:      true,
-                                    slotMode:            true,
-                                    includeDownloadInfo: true);
+            var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
+                                                         null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
+                                                         true, true);
 
-            foreach (var changeset in changesets.Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId))
-            {
-                yield return BuildTfsChangeset(changeset, remote);
-            }
+            return changesets.Cast<Changeset>()
+                .OrderBy(changeset => changeset.ChangesetId)
+                .Select(changeset => BuildTfsChangeset(changeset, remote));
         }
 
         public virtual bool CanGetBranchInformation { get { return false; } }
