@@ -113,20 +113,14 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
-            var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest,
-                                    deletionId:          0,
-                                    recursion:           RecursionType.Full,
-                                    user:                null,
-                                    versionFrom:         new ChangesetVersionSpec((int)startVersion),
-                                    versionTo:           VersionSpec.Latest,
-                                    maxCount:            int.MaxValue,
-                                    includeChanges:      true,
-                                    slotMode:            true,
-                                    includeDownloadInfo: true);
+            var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
+                null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true, true, true)
+                .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray();
 
-            foreach (var changeset in changesets.Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId))
+            for (int i = 0; i < changesets.Length; i++)
             {
-                yield return BuildTfsChangeset(changeset, remote);
+                yield return BuildTfsChangeset(changesets[i], remote);
+                changesets[i] = null;
             }
         }
 
@@ -444,6 +438,10 @@ namespace Sep.Git.Tfs.VsCommon
                     var item = (UnshelveItem)change.Item;
                     item.Get(workspace);
                 }
+            }
+
+            public void Dispose()
+            {
             }
         }
 
