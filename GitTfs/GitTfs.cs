@@ -39,6 +39,7 @@ namespace Sep.Git.Tfs
             var command = ExtractCommand(args);
             if(RequiresValidGitRepository(command)) AssertValidGitRepository();
             var unparsedArgs = ParseOptions(command, args);
+            _globals.Profiler.Sample("start");
             return Main(command, unparsedArgs);
         }
 
