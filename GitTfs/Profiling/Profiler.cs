@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace GitTfs.Profiling
             {
                 var outputFile = string.Format("git-tfs-profile-{0:yyyyMMdd-hhmmss}.csv", DateTime.Now);
                 var outputPath = Path.Combine(Environment.CurrentDirectory, outputFile);
+                System.Diagnostics.Trace.WriteLine("Writing performance data to " + outputPath);
                 _writer = new StreamWriter(outputPath);
                 WriteRow("", GetColumnNames());
             }
@@ -37,7 +39,7 @@ namespace GitTfs.Profiling
             WriteRow(sampleName, GetValues());
         }
 
-        protected virtual IEnumerable<object> GetValues()
+        protected virtual IEnumerable GetValues()
         {
             throw new NotImplementedException();
         }
@@ -47,7 +49,7 @@ namespace GitTfs.Profiling
             throw new NotImplementedException();
         }
 
-        void WriteRow(string col1, IEnumerable<object> cols)
+        protected void WriteRow(string col1, IEnumerable cols)
         {
             InitWriter();
             _writer.Write(col1);
