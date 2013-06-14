@@ -40,7 +40,14 @@ namespace Sep.Git.Tfs
             if(RequiresValidGitRepository(command)) AssertValidGitRepository();
             var unparsedArgs = ParseOptions(command, args);
             _globals.Profiler.Sample("start");
-            return Main(command, unparsedArgs);
+            try
+            {
+                return Main(command, unparsedArgs);
+            }
+            finally
+            {
+                _globals.Profiler.Dispose();
+            }
         }
 
         public int Main(GitTfsCommand command, IList<string> unparsedArgs)
