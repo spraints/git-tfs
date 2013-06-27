@@ -127,6 +127,7 @@
     <Compile Include="Core\TfsWorkspaceTests.cs" />
     <Compile Include="GitTfsRegexTests.cs" />
     <Compile Include="Integration\BootstrapTests.cs" />
+    <Compile Include="Integration\CheckinTests.cs" />
     <Compile Include="Integration\CloneTests.cs" />
     <Compile Include="Integration\FetchTests.cs" />
     <Compile Include="Integration\InitTests.cs" />
