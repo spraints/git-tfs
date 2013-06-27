@@ -17,6 +17,11 @@ namespace Sep.Git.Tfs.Commands
 
         protected override long DoCheckin(TfsChangesetInfo changeset, string refToCheckin)
         {
+            if (changeset.Remote.GatedCheckinsRequired || _checkinOptions.Gated)
+            {
+                changeset.Remote.Shelve("todo", refToCheckin, changeset, true);
+                return GitTfsExitCodes.OK;
+            }
             return changeset.Remote.Checkin(refToCheckin, changeset, _checkinOptions);
         }
     }
