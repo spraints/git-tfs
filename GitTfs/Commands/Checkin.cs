@@ -19,7 +19,9 @@ namespace Sep.Git.Tfs.Commands
         {
             if (changeset.Remote.GatedCheckinsRequired || _checkinOptions.Gated)
             {
-                changeset.Remote.Shelve("todo", refToCheckin, changeset, true);
+                var shelvesetName = "todo";
+                changeset.Remote.Shelve(shelvesetName, refToCheckin, changeset, true);
+                changeset.Remote.QueueGatedCheckinBuild(shelvesetName);
                 return GitTfsExitCodes.OK;
             }
             return changeset.Remote.Checkin(refToCheckin, changeset, _checkinOptions);
