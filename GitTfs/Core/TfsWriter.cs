@@ -17,26 +17,40 @@ namespace Sep.Git.Tfs.Core
             _globals = globals;
         }
 
+        /// <summary>
+        /// Locates the base changeset/commit to use when checking in or shelving `refToWrite`.
+        /// </summary>
+        [Obsolete("This is a dumb API. Use FindBaseChangesetCommit instead.")]
         public int Write(string refToWrite, Func<TfsChangesetInfo, string, int> write)
         {
-            var tfsParents = _globals.Repository.GetLastParentTfsCommits(refToWrite);
+            var parentChangeset = FindParentChangeset(refToWrite);
+            if (parentChangeset != null)
+                return write(parentChangeset, refToWrite);
+            return GitTfsExitCodes.InvalidArguments;
+        }
+
+        /// <summary>
+        /// Locates the base changeset/commit to use when checking in or shelving `refToWrite`.
+        /// </summary>
+        private TfsChangesetInfo FindParentChangeset(string gitRef)
+        {
+            var tfsParents = _globals.Repository.GetLastParentTfsCommits(gitRef);
             if (_globals.UserSpecifiedRemoteId != null)
                 tfsParents = tfsParents.Where(changeset => changeset.Remote.Id == _globals.UserSpecifiedRemoteId);
             switch (tfsParents.Count())
             {
                 case 1:
-                    var changeset = tfsParents.First();
-                    return write(changeset, refToWrite);
+                    return tfsParents.First();
                 case 0:
                     _stdout.WriteLine("No TFS parents found!");
-                    return GitTfsExitCodes.InvalidArguments;
+                    return null;
                 default:
                     _stdout.WriteLine("More than one parent found! Use -i to choose the correct parent from: ");
                     foreach (var parent in tfsParents)
                     {
                         _stdout.WriteLine("  " + parent.Remote.Id);
                     }
-                    return GitTfsExitCodes.InvalidArguments;
+                    return null;
             }
         }
     }
