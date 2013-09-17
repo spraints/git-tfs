@@ -225,7 +225,8 @@ namespace Sep.Git.Tfs.VsCommon
             }
             catch (ConnectionException exception)
             {
-                Debug.Assert(exception.Message.StartsWith("TF26175:"), "Not expected exception from TFS.");
+                if (!exception.Message.StartsWith("TF26175:"))
+                    throw;
             }
 
             return result != null && result.Length > 0;
