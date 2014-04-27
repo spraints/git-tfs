@@ -17,4 +17,5 @@ cmake --build . --target install
 export LD_LIBRARY_PATH=$PWD/libgit2-bin/lib
 
 cd ../../..
+false
 xbuild CI.proj
