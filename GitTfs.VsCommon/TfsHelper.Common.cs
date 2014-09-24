@@ -161,24 +161,39 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1, bool byLots = false)
         {
+            Func<VersionSpec, VersionSpec, Changeset[]> queryFunc;
+            var batchCount = 100;
             if (Is2008OrOlder)
             {
-                foreach (var changeset in GetChangesetsForTfs2008(path, startVersion, remote))
-                    yield return changeset;
+                byLots = false;
+                queryFunc = new Func<VersionSpec, VersionSpec, Changeset[]>((_start, _) =>
+                    VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
+                                                null, _start, VersionSpec.Latest, int.MaxValue,
+                                                true, true, true)
+                                  .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray());
+            }
+            else
+            {
+                if (!byLots)
+                {
+                    lastVersion = -1;
+                    batchCount = int.MaxValue;
+                }
+                queryFunc = new Func<VersionSpec,VersionSpec,Changeset[]>((_start, _last) =>
+                    VersionControl.QueryHistory(path, _last, 0, RecursionType.Full,
+                                                null, _start, _last, batchCount, true, true, true, true)
+                                  .Cast<Changeset>().ToArray());
             }
 
-            const int batchCount = 100;
-            var start = (int)startVersion;
+            var startChangeset = new ChangesetVersionSpec((int)startVersion);
             Changeset[] changesets;
             var lastChangeset = lastVersion == -1 ? VersionSpec.Latest : new ChangesetVersionSpec((int)lastVersion);
             do
             {
-                var startChangeset = new ChangesetVersionSpec(start);
-                changesets = Retry.Do(() => VersionControl.QueryHistory(path, lastChangeset, 0, RecursionType.Full,
-                    null, startChangeset, lastChangeset, batchCount, true, true, true, true)
-                    .Cast<Changeset>().ToArray());
+                changesets = Retry.Do(() => queryFunc(startChangeset, lastChangeset));
+
                 if (changesets.Length > 0)
-                    start = changesets[changesets.Length - 1].ChangesetId + 1;
+                    startChangeset = new ChangesetVersionSpec(changesets[changesets.Length - 1].ChangesetId + 1);
 
                 // don't take the enumerator produced by a foreach statement or a yield statement, as there are references 
                 // to the old (iterated) elements and thus the referenced changesets won't be disposed until all elements were iterated.
@@ -188,21 +203,6 @@ namespace Sep.Git.Tfs.VsCommon
                     changesets[i] = null;
                 }
             } while (!byLots && changesets.Length == batchCount);
-        }
-
-        public IEnumerable<ITfsChangeset> GetChangesetsForTfs2008(string path, long startVersion, IGitTfsRemote remote)
-        {
-            var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                                                                        null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue,
-                                                                        true, true, true)
-                                                          .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray();
-            // don't take the enumerator produced by a foreach statement or a yield statement, as there are references
-            // to the old (iterated) elements and thus the referenced changesets won't be disposed until all elements were iterated.
-            for (int i = 0; i < changesets.Length; i++)
-            {
-                yield return BuildTfsChangeset(changesets[i], remote);
-                changesets[i] = null;
-            }
         }
 
         public virtual int FindMergeChangesetParent(string path, long targetChangeset, GitTfsRemote remote)
