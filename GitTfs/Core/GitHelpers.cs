@@ -251,13 +251,36 @@ namespace Sep.Git.Tfs.Core
             return process;
         }
 
+        private bool IsGitErrorMessageDiplayed = true;
         private void StdErrReceived(object sender, DataReceivedEventArgs e)
         {
             if(e.Data != null && e.Data.Trim() != "")
             {
-                Trace.WriteLine(e.Data.TrimEnd(), "git stderr");
+                if (IsGitErrorMessageDiplayed)
+                {
+                    realStdout.Write("git error: ");
+                    realStdout.WriteLine(e.Data.TrimEnd(), "git stderr");
+                }
+                else
+                {
+                    Trace.WriteLine(e.Data.TrimEnd(), "git stderr");
+                }
             }
         }
+
+        public T HideGitErrorMessage<T>(Func<T> func)
+        {
+            IsGitErrorMessageDiplayed = false;
+            try
+            {
+                return func.Invoke();
+            }
+            finally
+            {
+                IsGitErrorMessageDiplayed = true;
+            }
+        }
+
 
         /// <summary>
         /// WrapGitCommandErrors the actions, and if there are any git exceptions, rethrow a new exception with the given message.

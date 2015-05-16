@@ -101,7 +101,7 @@ namespace Sep.Git.Tfs
             var git = _container.GetInstance<IGitHelpers>();
             try
             {
-                _globals.StartingRepositorySubDir = git.CommandOneline("rev-parse", "--show-prefix");
+                _globals.StartingRepositorySubDir = git.HideGitErrorMessage(() => git.CommandOneline("rev-parse", "--show-prefix"));
             }
             catch (Exception)
             {
