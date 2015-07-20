@@ -76,12 +76,12 @@ namespace Sep.Git.Tfs.Core
             return new ProcessStdoutReader(this, process);
         }
 
-        public class ProcessStdoutReader : TextReader
+        class ProcessStdoutReader : TextReader
         {
-            private readonly Process process;
+            private readonly GitProcess process;
             private readonly GitHelpers helper;
 
-            public ProcessStdoutReader(GitHelpers helper, Process process)
+            public ProcessStdoutReader(GitHelpers helper, GitProcess process)
             {
                 this.helper = helper;
                 this.process = process;
@@ -193,7 +193,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private void Close(Process process)
+        private void Close(GitProcess process)
         {
             // if caller doesn't read entire stdout to the EOF - it is possible that 
             // child process will hang waiting until there will be free space in stdout
@@ -229,12 +229,12 @@ namespace Sep.Git.Tfs.Core
             // there is no StandardInputEncoding property, use extension method StreamWriter.WithEncoding instead
         }
 
-        private Process Start(string[] command)
+        private GitProcess Start(string[] command)
         {
             return Start(command, x => {});
         }
 
-        protected virtual Process Start(string [] command, Action<ProcessStartInfo> initialize)
+        protected virtual GitProcess Start(string [] command, Action<ProcessStartInfo> initialize)
         {
             var startInfo = new ProcessStartInfo();
             startInfo.FileName = "git";
@@ -248,7 +248,7 @@ namespace Sep.Git.Tfs.Core
             var process = Process.Start(startInfo);
             process.ErrorDataReceived += StdErrReceived;
             process.BeginErrorReadLine();
-            return process;
+            return new GitProcess(process);
         }
 
         private bool IsGitErrorMessageDiplayed = true;
@@ -311,6 +311,34 @@ namespace Sep.Git.Tfs.Core
         {
             if(command.Length < 1 || !ValidCommandName.IsMatch(command[0]))
                 throw new Exception("bad command: " + (command.Length == 0 ? "" : command[0]));
+        }
+
+        protected class GitProcess
+        {
+            Process _process;
+
+            public GitProcess(Process process)
+            {
+                _process = process;
+            }
+
+            public static implicit operator Process(GitProcess process)
+            {
+                return process._process;
+            }
+
+            // Delegate a bunch of things to the Process.
+
+            public ProcessStartInfo StartInfo { get { return _process.StartInfo; } }
+            public int ExitCode { get { return _process.ExitCode; } }
+
+            public StreamWriter StandardInput { get { return _process.StandardInput; } }
+            public StreamReader StandardOutput { get { return _process.StandardOutput; } }
+
+            public bool WaitForExit(int milliseconds)
+            {
+                return _process.WaitForExit(milliseconds);
+            }
         }
     }
 }

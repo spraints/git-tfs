@@ -65,7 +65,7 @@ namespace Sep.Git.Tfs.Core
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
 
-        protected override Process Start(string[] command, Action<ProcessStartInfo> initialize)
+        protected override GitProcess Start(string[] command, Action<ProcessStartInfo> initialize)
         {
             return base.Start(command, initialize.And(SetUpPaths));
         }
