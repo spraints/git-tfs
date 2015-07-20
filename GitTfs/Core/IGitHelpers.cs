@@ -12,7 +12,6 @@ namespace Sep.Git.Tfs.Core
         void CommandInputPipe(Action<TextWriter> action, params string[] command);
         void CommandInputOutputPipe(Action<TextWriter, TextReader> interact, params string[] command);
         void WrapGitCommandErrors(string exceptionMessage, Action action);
-        T HideGitErrorMessage<T>(Func<T> func);
         IGitRepository MakeRepository(string dir);
     }
 }

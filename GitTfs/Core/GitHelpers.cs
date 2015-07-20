@@ -208,7 +208,7 @@ namespace Sep.Git.Tfs.Core
             if (!process.WaitForExit((int)TimeSpan.FromSeconds(10).TotalMilliseconds))
                 throw new GitCommandException("Command did not terminate.", process);
             if(process.ExitCode != 0)
-                throw new GitCommandException(string.Format("Command exited with error code: {0}", process.ExitCode), process);
+                throw new GitCommandException(string.Format("Command exited with error code: {0}\n{1}", process.ExitCode, process.StandardErrorString), process);
         }
 
         private void RedirectStdout(ProcessStartInfo startInfo)
@@ -245,42 +245,10 @@ namespace Sep.Git.Tfs.Core
             RedirectStderr(startInfo);
             initialize(startInfo);
             Trace.WriteLine("Starting process: " + startInfo.FileName + " " + startInfo.Arguments, "git command");
-            var process = Process.Start(startInfo);
-            process.ErrorDataReceived += StdErrReceived;
-            process.BeginErrorReadLine();
-            return new GitProcess(process);
+            var process = new GitProcess(Process.Start(startInfo));
+            process.ConsumeStandardError();
+            return process;
         }
-
-        private bool IsGitErrorMessageDiplayed = true;
-        private void StdErrReceived(object sender, DataReceivedEventArgs e)
-        {
-            if(e.Data != null && e.Data.Trim() != "")
-            {
-                if (IsGitErrorMessageDiplayed)
-                {
-                    realStdout.Write("git error: ");
-                    realStdout.WriteLine(e.Data.TrimEnd(), "git stderr");
-                }
-                else
-                {
-                    Trace.WriteLine(e.Data.TrimEnd(), "git stderr");
-                }
-            }
-        }
-
-        public T HideGitErrorMessage<T>(Func<T> func)
-        {
-            IsGitErrorMessageDiplayed = false;
-            try
-            {
-                return func.Invoke();
-            }
-            finally
-            {
-                IsGitErrorMessageDiplayed = true;
-            }
-        }
-
 
         /// <summary>
         /// WrapGitCommandErrors the actions, and if there are any git exceptions, rethrow a new exception with the given message.
@@ -325,6 +293,25 @@ namespace Sep.Git.Tfs.Core
             public static implicit operator Process(GitProcess process)
             {
                 return process._process;
+            }
+
+            public string StandardErrorString { get; private set; }
+
+            public void ConsumeStandardError()
+            {
+                StandardErrorString = "";
+                _process.ErrorDataReceived += StdErrReceived;
+                _process.BeginErrorReadLine();
+            }
+
+            private void StdErrReceived(object sender, DataReceivedEventArgs e)
+            {
+                if (e.Data != null && e.Data.Trim() != "")
+                {
+                    var data = e.Data;
+                    Trace.WriteLine(data.TrimEnd(), "git stderr");
+                    StandardErrorString += data;
+                }
             }
 
             // Delegate a bunch of things to the Process.
